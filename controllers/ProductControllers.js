@@ -25,7 +25,8 @@ const CreateProduct= async(req,res)=>{
 //Get all products
 const getProduct= async(req,res)=>{
     try{
-        const {search}= req.query;
+        const {search,category,minPrice,maxPrice}= req.query;
+        //1. Search by product title
         let filter={};
         if(search)
         {
@@ -34,6 +35,51 @@ const getProduct= async(req,res)=>{
                 $options:"i"
             };
         }
+        //2. Filter by category
+        if(category)
+        {
+            filter.category=category;
+        }
+        //3. Filter By price range
+        if(minPrice!==undefined || maxPrice!==undefined)
+        {
+             const priceFilter={};
+             if(minPrice!==undefined)
+             {
+                const min= Number(minPrice);
+                if(!Number.isFinite(min) || min<0)
+                {
+                    return res.status(400).json({
+                        success:false,
+                        message:"Invalid minimum Price"
+                    });
+                }
+                priceFilter.$gte=min;
+             }
+             if(maxPrice!==undefined)
+             {
+                const max=Number(maxPrice);
+                if(!Number.isFinite(max) || max<0)
+                {
+                    return res.status(400).json({
+                        success:false,
+                        message:"Invalid maximum price range"
+                    })
+                }
+                priceFilter.$lte=max;
+             }
+            
+             if(priceFilter.$gte!==undefined && priceFilter.$lte !==undefined && priceFilter.$gte>priceFilter.$lte)
+             {
+                return res.status(400).json({
+                    success:false,
+                    message:"Minimum price cannot exceed than maximum price"
+                });
+             }
+
+             filter.price=priceFilter;
+            }
+        //4. Fetch filter products
         const AllProducts=await ProductModel.find(filter);
         res.status(201).json({
             success:true,
