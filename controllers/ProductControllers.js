@@ -25,9 +25,19 @@ const CreateProduct= async(req,res)=>{
 //Get all products
 const getProduct= async(req,res)=>{
     try{
-        const {search,category,minPrice,maxPrice}= req.query;
-        //1. Search by product title
-        let filter={};
+        const {search,category,minPrice,maxPrice,sort,page=1,limit=10}= req.query;
+        //1. validate page
+        const pageNumber=Number(page);
+        const limitNumber=Number(limit);
+        if(!Number.isFinite(pageNumber) || !Number.isFinite(pageNumber)|| pageNumber<1 || limitNumber<1 || limitNumber>100)
+        {
+            return res.status(400).json({
+                success:false,
+                message:"Invalid Page or limit"
+            });
+        }
+        //2. Search by product title
+        const filter={};
         if(search)
         {
             filter.title={
@@ -35,12 +45,12 @@ const getProduct= async(req,res)=>{
                 $options:"i"
             };
         }
-        //2. Filter by category
+        //3. Filter by category
         if(category)
         {
             filter.category=category;
         }
-        //3. Filter By price range
+        //4. Filter By price range
         if(minPrice!==undefined || maxPrice!==undefined)
         {
              const priceFilter={};
@@ -76,16 +86,42 @@ const getProduct= async(req,res)=>{
                     message:"Minimum price cannot exceed than maximum price"
                 });
              }
+             if(Object.keys(priceFilter).length()>0)
+                filter.price=priceFilter; 
 
-             filter.price=priceFilter;
+            
             }
-        //4. Fetch filter products
-        const AllProducts=await ProductModel.find(filter);
-        res.status(201).json({
-            success:true,
-            count:AllProducts.length,
-            Products:AllProducts
-        })
+            // 4. Sorting
+            const sortoptions={};
+            if(sort==="price_asc")
+                sortoptions.price=1;
+            else if(sort==="price_desc")
+                sortoptions.price=-1;
+            else if(sort!==undefined)
+            {
+                return res.status(400).json({
+                    success:false,
+                    message:"Invalid sort option"
+                })
+            }
+            //5.Pagination
+            const skip=(pageNumber-1)*limitNumber;
+        //6. Fetch filter products
+        const [products,totalproducts]=await Promise.all([
+            ProductModel.find(filter)
+            .sort(sortoptions)
+            .skip(skip)
+            .limit(limitNumber),
+            ProductModel.countDocuments(filter)
+        ]);
+        return res.status(200).json({
+            success: true,
+            totalproducts,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(totalproducts / limitNumber),
+            productsPerPage: limitNumber,
+            products
+        });
     }
     catch(err)
     {
