@@ -32,7 +32,7 @@ const SignUp= async(req,res)=>{
            _id:newUser.id,
         name:newUser.name,
         email:newUser.email,
-        token:generatetoken(newUser._id) 
+        token:generatetoken(newUser) 
         });
     }
     else
@@ -63,14 +63,13 @@ const SignIn= async(req,res)=>{
     }
     const FoundUser=await UserModel.findOne({email});
 
-    if(FoundUser)
-    {
-        if(await bcrypt.compare(password, FoundUser.password))
-            res.status(201).json({
+        if(FoundUser && await bcrypt.compare(password, FoundUser.password))
+        {
+            res.status(200).json({
         _id:FoundUser.id,
         name:FoundUser.name,
         email:FoundUser.email,
-        token:generatetoken(FoundUser._id)
+        token:generatetoken(FoundUser)
         })
     }
     else
@@ -91,7 +90,7 @@ catch(err)
 }
 
 };
-const generatetoken= (id)=>{
+const generatetoken= (user)=>{
     return jwt.sign({
           id: user._id,
           email:user.email,

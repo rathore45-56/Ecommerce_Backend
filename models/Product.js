@@ -11,16 +11,19 @@ const ProductModel=new Schema({
     {
         type:Number,
         required:true,
+        min:0
     },
      description:
     {
         type:String,
         required:true,
+        trim:true
     },
      category:
     {
         type:String,
         required:true,
+        trim:true
     },
      image:
     {
@@ -36,12 +39,15 @@ const ProductModel=new Schema({
     {
         type:Number,
         required:true,
-        default:0
+        default:0,
+        min:0
     },
      ratings:
     {
         type:Number,
-        default:0
+        default:0,
+        min:0,
+        max:5
     },
     Reviews:
     {

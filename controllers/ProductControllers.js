@@ -1,8 +1,39 @@
-const ProductModel=require('../models/Product');
+const ProductModel= require('../models/Product');
+const mongoose=require('mongoose');
 //create all products
 const CreateProduct= async(req,res)=>{
     try{
          const { title, description, price, category, stock, image, brand } = req.body;
+         if(!title || !description || !category || price===undefined || stock===undefined)
+         {
+            return res.status(400).json({
+                success:false,
+                message:"Title, description, category, price and stock are required"
+            });
+         }
+         // Empty title || description || category
+         if(title.trim()===""||description.trim()===""|| category.trim==="")
+         {
+            return res.status(400).json({
+                success:false,
+                message:"Title, description, category cannot be empty"
+            });
+         }
+         // Price Validation
+         if(!Number.isFinite(Number(price))||Number(price)<0)
+         {
+            return res.status(400).json({
+        sucess:false,
+        message:"Price must be a non-negative number"
+        });
+    }
+    // Stock Validation
+      if (!Number.isInteger(Number(stock)) || Number(stock) < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Stock must be a valid non-negative integer"
+            });
+        }
          const newProduct= new ProductModel({ title, description, price, category, stock, image, brand, user:req.user._id})
          await newProduct.save();
 
@@ -15,6 +46,14 @@ const CreateProduct= async(req,res)=>{
     }
     catch(err)
     {
+        console.log(`Create Product Error ${err}`);
+        if(err.name==="ValidationError")
+        {
+            return res.status(400).json({
+                success:false,
+                message:err.message
+            })
+        }
         res.status(500).json({
             success:false,
             message:err.message
@@ -29,7 +68,7 @@ const getProduct= async(req,res)=>{
         //1. validate page
         const pageNumber=Number(page);
         const limitNumber=Number(limit);
-        if(!Number.isFinite(pageNumber) || !Number.isFinite(pageNumber)|| pageNumber<1 || limitNumber<1 || limitNumber>100)
+        if(!Number.isFinite(pageNumber) || !Number.isFinite(limitNumber)|| pageNumber<1 || limitNumber<1 || limitNumber>100)
         {
             return res.status(400).json({
                 success:false,
@@ -86,7 +125,7 @@ const getProduct= async(req,res)=>{
                     message:"Minimum price cannot exceed than maximum price"
                 });
              }
-             if(Object.keys(priceFilter).length()>0)
+             if(Object.keys(priceFilter).length>0)
                 filter.price=priceFilter; 
 
             
@@ -162,11 +201,20 @@ const getSingleProductById= async(req,res)=>{
 // Update the product
 const UpdateProduct= async (req,res) => {
     try{
+        if(!mongoose.Types.ObjectId.isValid(req.params.id))
+        {
+            return res.status(400).json({
+                success:false,
+                message:"Invalid Product ID"
+            });
+        }
        
             const updatedproduct= await ProductModel.findByIdAndUpdate(
                req.params.id,
                req.body,
-               {new:true}
+               {new:true,
+                runValidators:true
+               }
             );
             if(!updatedproduct)
             {
@@ -175,26 +223,41 @@ const UpdateProduct= async (req,res) => {
                     message:"Product Not Found"
                 })
             }
-            res.status(201).json({
+            res.status(200).json({
                 success:true,
                 product:updatedproduct
-            })
+            });
         }
       
     
     catch(err)
     {
+        console.error(`Update Product Error is ${err}`);
+        if(err.name==="ValidationError")
+        {
+            return res.status(400).json({ // Mongoose validation error hai isiliye status 400 hai
+                success:false,
+                message:err.message
+            })
+        }
         res.status(500).json({
             success:false,
-            message:err.message
+            message:"Internal Server Error"
         })
     }
 };
 // Delete Product
 const deleteProduct= async (req,res) => {
     try{
+        if(!mongoose.Types.ObjectId.isValid(req.params.id))
+        {
+            return res.status(400).json({
+                success:false,
+                message:"Invalid product Id"
+            });
+        }
         const product= await ProductModel.findByIdAndDelete(req.params.id);
-        if(!Product)
+        if(!product)
         {
            return res.json({
             success:false,
@@ -208,6 +271,8 @@ const deleteProduct= async (req,res) => {
     }
     catch(err)
     {
+        console.log(`Delete Product Error is ${err}`);
+        
         res.status(500).json({
             success:false,
             message:err.message
