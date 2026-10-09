@@ -1,6 +1,6 @@
 const cart=require('../models/cart');
 const Product=require('../models/Product')
-
+const mongoose=require('mongoose');
 //Helper function to calculate total price on each updation
 const caltotalprice= async (products) => {
     let total=0;
@@ -19,28 +19,59 @@ const caltotalprice= async (products) => {
 // create cart
 const Addtocart= async (req,res) => {
     try{
-        console.log("REQ.USER:", req.user);
-console.log("USER ID:", req.user?._id);
-console.log("BODY:", req.body);
+       
         const userid=req.user._id;
         const{productId,quantity}=req.body;
-        const product= await Product.findById(productId);
-        if(!product)
-            return res.status(400).json({message:"Product Not Found"});
+        const quantityNumber=Number(quantity);
+        if(quantity===undefined|| !Number.isInteger(quantityNumber) || quantityNumber<1)
+        {
+            return res.status(400).json({
+        success:false,
+    message:"Qunatity must be a positive integer"});
+            }
+      if(!mongoose.Types.ObjectId.isValid(productId))
+      {
+        return res.status(400).json({
+            success:false,
+            message:"Product ID must be valid"
+        });
+      }
+      const product=await Product.findById(productId);
+      if (!product) {
+    return res.status(404).json({
+        success: false,
+        message: "Product Not Found"
+    });
+}
+if(quantityNumber>product.stock)
+{
+ return res.status(400).json({
+        success: false,
+        message: "Requested quantity exceeds available stock"
+    });
+}
 
         let Cart= await cart.findOne({user:userid});
         if(Cart)
         {
-          const exist= await Cart.products.find(
+          const exist= Cart.products.find(
             item=>item.product.toString===productId
           );
           if(exist)
           {
-            exist.quantity+=quantity
+            const newquantity=exist.quantity+quantityNumber;
+            if(newquantity>product.stock)
+            {
+                 return res.status(400).json({
+            success: false,
+            message: "Requested quantity exceeds available stock"
+        });
+            }
+            exist.quantity=newquantity;
           }
           else{
             Cart.products.push({product:productId,
-                quantity:quantity});
+                quantity:quantityNumber});
           }
           Cart.totalcartprice= await caltotalprice(Cart.products);
         }
@@ -50,8 +81,8 @@ console.log("BODY:", req.body);
                 user: userid,
                 products:[{
                     product:productId,
-                    quantity:quantity}],
-                totalcartprice:product.price*quantity
+                    quantity:quantityNumber}],
+                totalcartprice:product.price*quantityNumber
             });
 
         }
@@ -103,16 +134,38 @@ const updatecart=async(req,res)=>{
     try{
     const userid=req.user._id;
     const{productId,quantity}=req.body;
+    const quantityNumber=Number(quantity);
+     if(quantity===undefined|| !Number.isInteger(quantityNumber) || quantityNumber<1)
+        {
+            return res.status(400).json({
+        success:false,
+    message:"Qunatity must be a positive integer"});
+            }
     let Cart= await cart.findOne({user:userid});
     if(!Cart)
         return res.status(400).json({message:"Cart not Found"});
-    const productexist=await Cart.products.find(
-        item=>item.product.toString==productId
-    );
-    if(!productexist)
+    const productexist = Cart.products.find(
+    item => item.product.toString() === productId
+);
+if(!productexist)
         return res.status(400).json({message:"Product Not in cart"});
+    const product= await Product.findById(productId);
+    if (!product) {
+    return res.status(404).json({
+        success: false,
+        message: "Product Not Found"
+    });
+}
+if(quantityNumber>product.stock)
+{
+     return res.status(400).json({
+        success: false,
+        message: "Requested quantity exceeds available stock"
+    })
+}
+   
 
-    productexist.quantity=quantity;
+    productexist.quantity=quantityNumber;
     Cart.totalcartprice=await caltotalprice(Cart.products);
     await Cart.save();
     res.status(201).json({
@@ -140,7 +193,7 @@ const removecart= async (req,res) => {
         success:false,
         message:"Cart Not Found"
         });
-         const productexist = Cart.products.find(
+         const productexist= Cart.products.find(
             item => item.product.toString() === productId
         );
 
@@ -151,11 +204,11 @@ const removecart= async (req,res) => {
             });
         }
         Cart.products= Cart.products.filter(
-            item=>item.product.toString!== productId
+            item=>item.product.toString()!== productId
         );
-        cart.totalcartprice= await caltotalprice(Cart.products);
-        await cart.save();
-        res.status(201).json({
+        Cart.totalcartprice= await caltotalprice(Cart.products);
+        await Cart.save();
+        res.status(200).json({
             success:true,
             message:"Cart removed successfully",
             cart:Cart

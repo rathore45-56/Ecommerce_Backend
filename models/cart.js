@@ -18,7 +18,12 @@ const cartschema= new Schema({
             {
               type:Number,
               required:true,
-              default:1
+              default:1,
+              min:[1,"Qunatity must be atleast 1"],
+              validate:{
+                validator:Number.isInteger,
+                message:"Quantity must be an integer"
+              }
             }
         }
     
