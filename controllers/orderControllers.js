@@ -14,50 +14,117 @@ const caltotalprice=async(products)=>{
 };
 // Place Order
 const placeOrder=async(req,res)=>{
+    const session=await require("mongoose").startSession();
     try{
     const userid=req.user._id;
-    const Cart= await cart.findOne({
+    let newOrder;
+    await session.withTransaction(async() => {
+        //1. Find the user's cart
+         const Cart= await cart.findOne({
         user:userid
-    }).populate("products.product");
+    }).populate("products.product")
+    .session(session);
+   
    if(!Cart || Cart.products.length===0)
    {
-        return res.status(400).json({
-            success:false,
-            message:"Cart is Empty"});
+    const err=new Error("Cart is Empty");
+    err.statusCode=400;
+    throw err;
    }
-   const totalprice=await caltotalprice(Cart.products);
+   // 2. Validate product existence and stock
+   for(const item of Cart.products)
+   {
+    if(!item.product)
+    {
+         const err = new Error("Product not found");
+                    err.statusCode = 400;
+                    throw err;
+    }
+    if(!Number.isInteger(item.quantity) ||
+                    item.quantity <= 0
+    ) {
+                            const err = new Error("Invalid product quantity");
+                    err.statusCode = 400;
+                    throw err;
+                }
+     if (item.product.stock < item.quantity) {
+                    const err = new Error(
+                        `Insufficient stock for ${item.product.title}`
+                    );
+                    err.statusCode = 400;
+                    throw err;
+                }
+            
+   }
+   // 3.Deduct stock safely
+   for(const item of Cart.products)
+   {
+    const updatedProduct= await Product.findByIdAndUpdate(
+        {
+            id:item.product._id,
+            stock:{$gte: item.quantity}
+        },
+         {
+            $inc:{stock: -item.quantity}
+         },
+         {
+            new:true,
+            session
+         }
+    );
+    if(!updatedProduct)
+    {
+        const err = new Error(
+                        `Insufficient stock for ${item.product.title}`
+                    );
+                    err.statusCode = 400;
+                    throw err;
+    }
+   }
+   // 4. Calculate total and prepare order items
+   const orderItems=Cart.products.map(item=>({
+    product:item.product._id,
+    quantity:item.quantity,
+    price:item.product.price
+   }))
+   const totalprice=orderItems.reduce(
+    (total,item)=>
+        total+item.price*item*quantity,
+    0
+   );
+   // 5. Create Order
+   const orders= await Order.create(
+    [{
+        user:userid,
+        orders:orderItems,
+        totalprice,
+        shippingAddress: req.body.shippingAddress,
+        paymentMethod:req.body.paymentMethod
+    }],
+    {session}
+   );
+   newOrder=orders[0];
+   //6. Clear cart after successfully order creation
+   Cart.products=[];
+   await Cart.save({session});
+    });
 
-   const neworder= await Order.create({
-    user:userid,
-    orders:Cart.products.map(item=>({
-             product:item.product,
-             quantity:item.quantity,
-             price:item.product.price
-    })),
-    totalprice : totalprice,
-    shippingAddress: req.body.shippingAddress,
-    paymentMethod:req.body.paymentMethod
-});
-
-
-
-
-Cart.products=[];
-await Cart.save();
-
-res.status(201).json({
+        return res.status(201).json({
     success:true,
     message:"Order Placed Successfully",
-    orders:neworder
-})
+    orders:newOrder
+});
 }
 catch(err)
 {
     console.error("Place Order Error",err);
-    res.status(500).json({
+    return res.status(err.statusCode || 500).json({
         success:false,
-        message:`internal Server Error: ${err.message}`
-    })
+        message:`internal Server Error: ${err.statusCode}`
+    });
+}
+finally{
+    await session.endSession();
 }
 };
 // Get all orders
@@ -153,7 +220,7 @@ const updateorderStatus=async(req,res)=>{
         }
     
     // Find Order
-    const order=Order.findById(orderId);
+    const order= await Order.findById(orderId);
     if (!order) {
             return res.status(404).json({
                 success: false,
