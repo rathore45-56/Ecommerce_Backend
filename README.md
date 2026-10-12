@@ -46,7 +46,7 @@ ecommerce-backend/
 └── README.md
 ```
 
-*The structure above is illustrative. Adjust the filenames and folders to match your actual project.*
+```*The structure above is illustrative. Adjust the filenames and folders to match your actual project.*```
 
 ## ⚙️ Installation and Setup
 
