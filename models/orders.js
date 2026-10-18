@@ -45,6 +45,13 @@ const Order= new Schema({
     orderStatus:
     {
         type:String,
+        enum:[
+            "Pending",
+            "Confirmed",
+            "Shipped",
+            "Delivered",
+            "Cancelled"
+        ],
         default:"Pending"
     }
 },

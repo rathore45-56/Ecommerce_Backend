@@ -203,6 +203,15 @@ const updateorderStatus=async(req,res)=>{
     try{
         const orderId= req.params.id;
         const {status}=req.body;
+        //1. Validate Order Id
+        if(!mongoose.Types.ObjectId.isValid(orderId))
+        {
+            return res.status(400).json({
+                success:false,
+                message:"Invalid Order Id"
+            });
+        }
+        // 2. Validate the requested status
         const allowedStatuses=[
             "Pending",
             "Confirmed",
@@ -219,19 +228,24 @@ const updateorderStatus=async(req,res)=>{
             });
         }
     
-    // Find Order
-    const order= await Order.findById(orderId);
+    // Find and update the Order
+    const order= await Order.findByIdAndUpdate(orderId,
+        {status},
+        {new:true,
+            runvalidators:true
+        }
+    );
+    //4. Check whether the orderexists
     if (!order) {
             return res.status(404).json({
                 success: false,
                 message: "Order not found"
             });
         }
-        order.orderStatus=status;
-        await order.save();
+        // 5. Send the updated order
         return res.status(200).json({
             success:true,
-            message:"Order Updated Successfully",
+            message:"Order status Updated Successfully",
             order:order
 
         });
