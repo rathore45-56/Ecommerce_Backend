@@ -10,7 +10,7 @@ A RESTful e-commerce backend built using **Node.js, Express.js, and MongoDB**. T
 * **Order Management:** Place orders, calculate order totals, and retrieve customer orders.
 * **Order Details:** Fetch individual orders with associated product information.
 * **Admin Order Management:** View all customer orders and update order statuses.
-* **Inventory Management:** Validate product availability and deduct stock during order placement.
+* **Inventory Management:** Validate product availability and deduct stock during order placement. 
 * **Role-Based Access:** Separate customer and admin route permissions.
 * **API Testing:** Test endpoints using Postman.
 
