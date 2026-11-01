@@ -1,18 +1,16 @@
 const mongoose=require('mongoose');
 const connectDB= async()=>{
-    try{
           
-        await mongoose.connect(process.env.MONGO_URI,{
-        serverSelectionTimeoutMS: 60000,  
-        });
-        console.log("connected successfully");
-    }
-    catch (err)
-    {
-        console.error("Error in connecting with Databse", err);
-        process.exit(1);
+        await mongoose.connect(process.env.MONGO_URI)
+        .then(()=>{
+            console.log("MongoDb Connected Successfully");
+            console.log("Database Name:", mongoose.connection.name);
+            console.log("Host Name:", mongoose.connection.host);
 
-        
+
+        })
+        .catch((error)=>{
+            console.log("MongoDb Connection Error:", error);
+        });
     }
-}
     module.exports= connectDB;

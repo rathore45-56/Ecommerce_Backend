@@ -1,6 +1,7 @@
 const cart = require('../models/cart');
 const Order=require('../models/orders');
 const Product=require('../models/Product');
+const mongoose =require('mongoose');
 //Calculte Price
 const caltotalprice=async(products)=>{
        let total=0;
@@ -260,13 +261,54 @@ const updateorderStatus=async(req,res)=>{
         });
     }
 };
+const cancelorder= async(req,res)=>{
+    try{
+        const orderId= req.params;
+        const order=await Order.findById(orderId);
+        if(!order)
+        {
+            return res.status(404).json({
+                success:false,
+                message:"Order Not Found"
+            })
+        }
+        // Check Ownership
+        if(order.user.toString()!==req.user._id.toString())
+        {
+            return res.status(403).json({
+                success:false,
+                message:"You are not authorized to cancel this order"
+            })
+        }
+        if(order.status==="Shipped" || order.status==="Delivered" || order.status==="Cancelled")
+        {
+            return res.status(400).json({
+                success:false,
+                message:"Order cannot be cancelled"
+            });
+        }
+        order.status="Cancelled";
+        await order.save();
+        return res.status(200).json({
+            success:true,
+            message:"Order Cancelled Successfully"
+        })
+    }
+    catch(err){
+            return res.status(500).json({
+                success:false,
+                message:err.message
+            })
+    }
+}
 
 module.exports = {
     placeOrder,
     getOrders,
     getSingleOrder,
     getallorders,
-    updateorderStatus
+    updateorderStatus,
+    cancelorder
 }
 
      
