@@ -174,6 +174,14 @@ Planned enhancements include:
 * API documentation
 * Additional security and performance improvements
 
+## Order Cancellation
+
+- Implemented order cancellation functionality.
+- Added order ownership validation.
+- Prevented cancellation of shipped and delivered orders.
+- Added validation for already cancelled orders.
+- Tested cancellation APIs using Postman.
+
 ## 👨‍💻 Author
 
 **Utkarsh Rathore**
