@@ -90,7 +90,7 @@ const placeOrder=async(req,res)=>{
    }))
    const totalprice=orderItems.reduce(
     (total,item)=>
-        total+item.price*item*quantity,
+        total+item.price * item.quantity,
     0
    );
    // 5. Create Order
@@ -132,10 +132,11 @@ finally{
 const getOrders= async (req,res) => {
     try{
          const userId=req.user._id;
-         const Orders= await Order.find({user:userId}).populate("orders.product");
+         const Orders= await Order.find({user:userId}).populate("orders.product").sort({createdAt:-1});
          return res.status(200).json({
             success:true,
-            orders:Orders});
+            count: Orders.length,
+            Orders});
     
 }
 catch (err) {
@@ -233,7 +234,7 @@ const updateorderStatus=async(req,res)=>{
     const order= await Order.findByIdAndUpdate(orderId,
         {status},
         {new:true,
-            runvalidators:true
+            runValidators:true
         }
     );
     //4. Check whether the orderexists
@@ -263,7 +264,7 @@ const updateorderStatus=async(req,res)=>{
 };
 const cancelorder= async(req,res)=>{
     try{
-        const orderId= req.params;
+        const orderId= req.params.id;
         const order=await Order.findById(orderId);
         if(!order)
         {
