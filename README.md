@@ -182,6 +182,14 @@ Planned enhancements include:
 - Added validation for already cancelled orders.
 - Tested cancellation APIs using Postman.
 
+### Order History
+
+- Implemented user-specific order history API.
+- Added authenticated order retrieval.
+- Sorted orders by creation date.
+- Ensured users can only access their own orders.
+- Tested API scenarios using Postman.
+
 ## 👨‍💻 Author
 
 **Utkarsh Rathore**
