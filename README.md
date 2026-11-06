@@ -190,6 +190,31 @@ Planned enhancements include:
 - Ensured users can only access their own orders.
 - Tested API scenarios using Postman.
 
+### Centralized Error Handling
+
+**Objective:** Implement centralized error handling to improve API reliability, consistency, and maintainability.
+
+**Tasks:**
+- [ ] Created centralized error-handling middleware.
+- [ ] Implemented consistent error response structure.
+- [ ] Added handling for HTTP status codes (400, 401, 403, 404, 500).
+- [ ] Integrated error middleware after API route registration.
+- [ ] Added handling for undefined API routes (404 Not Found).
+- [ ] Updated controllers to forward errors using `next(error)`.
+- [ ] Tested error scenarios using Postman.
+- [ ] Verified that existing API functionality remains unaffected.
+
+**Key Learnings:**
+- Express.js error-handling middleware.
+- Error propagation using `next(error)`.
+- HTTP status codes and exception handling.
+- Centralized error management in backend applications.
+
+**Git Commit:**
+`refactor: add centralized error handling`
+
+**Status:** In Progress
+
 ## 👨‍💻 Author
 
 **Utkarsh Rathore**
