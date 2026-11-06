@@ -16,12 +16,19 @@ const route = require("./routes/userRoutes");
 const route1 = require("./routes/productRoutes");
 const route2 = require("./routes/cartRoutes");
 const route3=require('./routes/orderRoute');
+const CentralizedErrorHandling= require('./Middleware/errorMiddleware');
 
 
 app.use("/api", route);
 app.use("/api", route1);
 app.use("/api", route2);
 app.use('/api',route3);
+app.use((res,req,next)=>{
+     const error= new Error("Route Not Found");
+     error.statusCode= 404;
+     next(error);
+    });
+app.use(CentralizedErrorHandling);
 
 const PORT = process.env.PORT || 3000;
 

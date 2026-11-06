@@ -151,7 +151,7 @@ catch (err) {
 };
 
 // Get Single Order
-const getSingleOrder= async(req,res)=>{
+const getSingleOrder= async(req,res,next)=>{
     try{
        const singleOrder=await Order.findById(
         req.params.id
@@ -171,12 +171,7 @@ const getSingleOrder= async(req,res)=>{
 
     } catch (err) {
 
-        console.error(err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
+        next(err);
     }
 
 };
