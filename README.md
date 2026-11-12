@@ -190,19 +190,22 @@ Planned enhancements include:
 - Ensured users can only access their own orders.
 - Tested API scenarios using Postman.
 
-### Centralized Error Handling
+###  Centralized Error Handling
 
-**Objective:** Implement centralized error handling to improve API reliability, consistency, and maintainability.
+- Implemented centralized error-handling middleware to manage application errors consistently across controllers.
+- Integrated `next(err)` to forward errors from Auth, Product, Cart, and Order controllers to the centralized middleware.
+- Standardized error responses with appropriate HTTP status codes and descriptive messages.
+- Tested error handling using Postman for the following HTTP status codes:
+  - **400 – Bad Request**
+  - **401 – Unauthorized**
+  - **403 – Forbidden**
+  - **404 – Not Found**
+  - **500 – Internal Server Error**
+- Improved code maintainability by reducing repetitive error-handling logic across controllers.
+- Verified existing API functionality after middleware integration.
 
-**Tasks:**
-- [ ] Created centralized error-handling middleware.
-- [ ] Implemented consistent error response structure.
-- [ ] Added handling for HTTP status codes (400, 401, 403, 404, 500).
-- [ ] Integrated error middleware after API route registration.
-- [ ] Added handling for undefined API routes (404 Not Found).
-- [ ] Updated controllers to forward errors using `next(error)`.
-- [ ] Tested error scenarios using Postman.
-- [ ] Verified that existing API functionality remains unaffected.
+**Outcome:** Improved API reliability, consistent error responses, and cleaner controller code.
+
 
 **Key Learnings:**
 - Express.js error-handling middleware.
