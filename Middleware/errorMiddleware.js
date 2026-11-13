@@ -1,9 +1,10 @@
-const CentralizedErrorHandling= async(req,resizeBy,next,err)=>
+const CentralizedErrorHandling= (err,req,res,next)=>
 {
-const statuscode= err.statuscode || err.status ||500;
+    console.log(err)
+const statuscode= err.statusCode ||500;
 res.status(statuscode).json({
     success:false,
-    meesage: err.message || "Internal server Error"
+    message: err.message || "Internal server Error"
 });
 
 };

@@ -4,7 +4,7 @@ const bcrypt=require('bcryptjs');
 const dotenv=require('dotenv');
 dotenv.config();
 
-const SignUp= async(req,res)=>{
+const SignUp= async(req,res,next)=>{
     try{
     const{name,email,password}=req.body;
     if(!name || !email || !password)
@@ -45,13 +45,10 @@ const SignUp= async(req,res)=>{
 }
 catch(err)
 {
-    res.status(500).json({
-        success:false,
-        message:`Internal server error ${err.message}`
-    })
+   next(err);
 }
 };
-const SignIn= async(req,res)=>{
+const SignIn= async(req,res,next)=>{
     try{
     const{email,password}=req.body;
     if(!email || !password)
@@ -83,10 +80,7 @@ const SignIn= async(req,res)=>{
 }
 catch(err)
 {
-    res.status.json({
-        success:false,
-        message:`Internal Server Error ${err.message}`
-    })
+    next(err);
 }
 
 };

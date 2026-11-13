@@ -14,7 +14,7 @@ const caltotalprice=async(products)=>{
        return total;
 };
 // Place Order
-const placeOrder=async(req,res)=>{
+const placeOrder=async(req,res,next)=>{
     const session=await require("mongoose").startSession();
     try{
     const userid=req.user._id;
@@ -119,17 +119,14 @@ const placeOrder=async(req,res)=>{
 catch(err)
 {
     console.error("Place Order Error",err);
-    return res.status(err.statusCode || 500).json({
-        success:false,
-        message:`internal Server Error: ${err.statusCode}`
-    });
+    next(err);
 }
 finally{
     await session.endSession();
 }
 };
 // Get all orders
-const getOrders= async (req,res) => {
+const getOrders= async (req,res,next) => {
     try{
          const userId=req.user._id;
          const Orders= await Order.find({user:userId}).populate("orders.product").sort({createdAt:-1});
@@ -141,12 +138,7 @@ const getOrders= async (req,res) => {
 }
 catch (err) {
 
-        console.error(err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
+      next(err);
     }
 };
 
@@ -176,7 +168,7 @@ const getSingleOrder= async(req,res,next)=>{
 
 };
 // ALL Customer's orders and it is supervision by admin
-const getallorders=async(req,res)=>{
+const getallorders=async(req,res,next)=>{
     try{
         const Orders=await Order.find().populate("user","-password")
         .populate("orders.product");
@@ -187,16 +179,11 @@ const getallorders=async(req,res)=>{
     }
     catch (err) {
 
-        console.error("Get All Orders Error", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-    }
+       next(err);
     };
+};
 // Update Order status
-const updateorderStatus=async(req,res)=>{
+const updateorderStatus=async(req,res,next)=>{
     try{
         const orderId= req.params.id;
         const {status}=req.body;
@@ -249,15 +236,10 @@ const updateorderStatus=async(req,res)=>{
     }
     catch (err) {
 
-        console.error("Update Order Status Error", err);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
+        next(err);
     }
 };
-const cancelorder= async(req,res)=>{
+const cancelorder= async(req,res,next)=>{
     try{
         const orderId= req.params.id;
         const order=await Order.findById(orderId);
@@ -291,10 +273,7 @@ const cancelorder= async(req,res)=>{
         })
     }
     catch(err){
-            return res.status(500).json({
-                success:false,
-                message:err.message
-            })
+           next(err);
     }
 }
 

@@ -1,7 +1,7 @@
 const ProductModel= require('../models/Product');
 const mongoose=require('mongoose');
 //create all products
-const CreateProduct= async(req,res)=>{
+const CreateProduct= async(req,res,next)=>{
     try{
          const { title, description, price, category, stock, image, brand } = req.body;
          if(!title || !description || !category || price===undefined || stock===undefined)
@@ -54,15 +54,12 @@ const CreateProduct= async(req,res)=>{
                 message:err.message
             })
         }
-        res.status(500).json({
-            success:false,
-            message:err.message
-        })
+       next(err);
     }
 
 };
 //Get all products
-const getProduct= async(req,res)=>{
+const getProduct= async(req,res,next)=>{
     try{
         const {search,category,minPrice,maxPrice,sort,page=1,limit=10}= req.query;
         //1. validate page
@@ -165,15 +162,12 @@ const getProduct= async(req,res)=>{
     catch(err)
     {
          console.error("Get Products Error:", err);
-        res.status(500).json({
-            success:false,
-            message:err.message
-        })
+       next(err);
     }
 
 };
 //Get Single Product
-const getSingleProductById= async(req,res)=>{
+const getSingleProductById= async(req,res,next)=>{
          try{
             const singleone=await ProductModel.findById(req.params.id);
             if(singleone)
@@ -191,15 +185,12 @@ const getSingleProductById= async(req,res)=>{
     }
         catch(err)
         {
-           res.status(500).json({
-            sucess:false,
-            message:err.message
-           })
+          next(err);
         }
          
 };
 // Update the product
-const UpdateProduct= async (req,res) => {
+const UpdateProduct= async (req,res,next) => {
     try{
         if(!mongoose.Types.ObjectId.isValid(req.params.id))
         {
@@ -240,14 +231,11 @@ const UpdateProduct= async (req,res) => {
                 message:err.message
             })
         }
-        res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
-        })
+       next(err);
     }
 };
 // Delete Product
-const deleteProduct= async (req,res) => {
+const deleteProduct= async (req,res,next) => {
     try{
         if(!mongoose.Types.ObjectId.isValid(req.params.id))
         {
@@ -273,10 +261,7 @@ const deleteProduct= async (req,res) => {
     {
         console.log(`Delete Product Error is ${err}`);
         
-        res.status(500).json({
-            success:false,
-            message:err.message
-        })
+        next(err);
     }
 };
 module.exports={CreateProduct,getProduct,getSingleProductById,UpdateProduct,deleteProduct};

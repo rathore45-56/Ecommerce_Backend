@@ -17,7 +17,7 @@ const caltotalprice= async (products) => {
 
 
 // create cart
-const Addtocart= async (req,res) => {
+const Addtocart= async (req,res,next) => {
     try{
        
         const userid=req.user._id;
@@ -95,14 +95,11 @@ if(quantityNumber>product.stock)
     }
     catch(err)
     {
-        res.status(500).json({
-        success:false,
-        message:`Internal Server Error ${err.message}`
-        });
+        next(err);
     }
 }
 // Get cart
-const getcart= async(req,res)=>{
+const getcart= async(req,res,next)=>{
     try{
     const userID= req.user._id;
     const Cart= await cart.findOne({user:userID}).populate("products.product");
@@ -123,14 +120,11 @@ const getcart= async(req,res)=>{
 }
 catch(err)
 {
-    res.status(500).json({
-        success:false,
-        message:`Interna Server Error ${err.message}`
-    })
+   next(err);
 }
 }
 //Update cart
-const updatecart=async(req,res)=>{
+const updatecart=async(req,res,next)=>{
     try{
     const userid=req.user._id;
     const{productId,quantity}=req.body;
@@ -176,14 +170,11 @@ if(quantityNumber>product.stock)
 }
 catch(err)
 {
-    res.status(500).json({
-    success:false,
-    message:`Internal Server error ${err.message}`
-    });
+    next(err);
 }
 }
 //Remove cart
-const removecart= async (req,res) => {
+const removecart= async (req,res,next) => {
     try{
         const userid=req.user._id;
         const productId= req.params.id;
@@ -216,10 +207,7 @@ const removecart= async (req,res) => {
     }
     catch(err)
     {
-        res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
-        });
+       next(err);
     }
 }
 module.exports={Addtocart,getcart,updatecart,removecart};
