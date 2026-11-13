@@ -218,6 +218,18 @@ Planned enhancements include:
 
 **Status:** In Progress
 
+### – Input Validation using express-validator
+
+- Installed and integrated `express-validator` for request data validation.
+- Created reusable validation middleware to handle validation errors.
+- Implemented registration validation for required name, valid email format, and minimum password length.
+- Integrated validation middleware into the user registration route.
+- Tested valid and invalid registration requests using Postman.
+- Verified appropriate HTTP 400 responses for invalid input data.
+- Improved API reliability by preventing invalid registration data from reaching controllers.
+
+**Outcome:** Implemented structured request validation and improved authentication API data integrity.
+
 ## 👨‍💻 Author
 
 **Utkarsh Rathore**
