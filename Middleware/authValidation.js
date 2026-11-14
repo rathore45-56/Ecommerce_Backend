@@ -19,4 +19,9 @@ const registerValidation=[
 
 
 ];
-module.exports={ registerValidation };
+const LoginValidation=[
+    body("email").trim().notEmpty().withMessage("Email is required").isEmail().withMessage("Please Enter a valid email"),
+    body("password").notEmpty().withMessage("Password is required")
+
+]
+module.exports={ registerValidation, LoginValidation };
