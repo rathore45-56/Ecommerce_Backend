@@ -218,17 +218,20 @@ Planned enhancements include:
 
 **Status:** In Progress
 
-### – Input Validation using express-validator
+### Input Validation using express-validator
 
 - Installed and integrated `express-validator` for request data validation.
-- Created reusable validation middleware to handle validation errors.
+- Created reusable validation middleware to handle invalid request data.
 - Implemented registration validation for required name, valid email format, and minimum password length.
-- Integrated validation middleware into the user registration route.
-- Tested valid and invalid registration requests using Postman.
+- Added login validation for email and password fields.
+- Implemented product validation for product creation and updates.
+- Added cart validation for product IDs and quantity management.
+- Integrated validation middleware into authentication, product, and cart routes.
+- Tested valid and invalid requests using Postman.
 - Verified appropriate HTTP 400 responses for invalid input data.
-- Improved API reliability by preventing invalid registration data from reaching controllers.
+- Retested existing API functionality to ensure validation did not break existing features.
 
-**Outcome:** Implemented structured request validation and improved authentication API data integrity.
+**Outcome:** Improved API reliability, data integrity, and security by validating incoming request data before processing it in controllers.
 
 ## 👨‍💻 Author
 
