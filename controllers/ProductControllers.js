@@ -65,7 +65,7 @@ const getProduct= async(req,res,next)=>{
         //1. validate page
         const pageNumber=Number(page);
         const limitNumber=Number(limit);
-        if(!Number.isFinite(pageNumber) || !Number.isFinite(limitNumber)|| pageNumber<1 || limitNumber<1 || limitNumber>100)
+        if(!Number.isInteger(pageNumber) || !Number.isInteger(limitNumber)||!Number.isFinite(pageNumber) || !Number.isFinite(limitNumber)|| pageNumber<1 || limitNumber<1 || limitNumber>100)
         {
             return res.status(400).json({
                 success:false,
@@ -129,10 +129,10 @@ const getProduct= async(req,res,next)=>{
             }
             // 4. Sorting
             const sortoptions={};
-            if(sort==="price_asc")
-                sortoptions.price=1;
-            else if(sort==="price_desc")
-                sortoptions.price=-1;
+            if(sort==="newest")
+                sortoptions.createdAt=-1;
+            else if(sort==="oldest")
+                sortoptions.createdAt=1;
             else if(sort!==undefined)
             {
                 return res.status(400).json({
@@ -156,6 +156,9 @@ const getProduct= async(req,res,next)=>{
             currentPage: pageNumber,
             totalPages: Math.ceil(totalproducts / limitNumber),
             productsPerPage: limitNumber,
+            hasNextPage: pageNumber < Math.ceil(totalproducts / limitNumber),
+            hasPreviousPage: pageNumber > 1,
+            
             products
         });
     }
