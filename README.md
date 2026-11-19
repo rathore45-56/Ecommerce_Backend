@@ -233,6 +233,27 @@ Planned enhancements include:
 
 **Outcome:** Improved API reliability, data integrity, and security by validating incoming request data before processing it in controllers.
 
+### Product Pagination, Sorting, Searching & Filtering
+
+- Implemented product pagination using `page` and `limit` query parameters.
+- Added sorting functionality to arrange products by price in ascending and descending order.
+- Implemented product search functionality using case-insensitive title matching.
+- Added category-based product filtering.
+- Implemented minimum and maximum price filtering.
+- Enabled combined searching, sorting, and filtering operations.
+- Added pagination metadata, including:
+  - Total number of products
+  - Current page
+  - Total pages
+  - Products per page
+  - `hasNextPage`
+  - `hasPreviousPage`
+- Added input validation for pagination parameters, price ranges, and sorting options.
+- Tested product listing APIs and different query parameter combinations using Postman.
+- Verified appropriate responses for valid and invalid requests.
+
+**Outcome:** Improved product discovery and API performance through structured pagination, flexible sorting, searching, and filtering.
+
 ## 👨‍💻 Author
 
 **Utkarsh Rathore**
